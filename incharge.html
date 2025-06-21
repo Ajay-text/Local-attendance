@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-all duration-300">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In-Charge Portal - CBSL</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2D3748', // Dark slate
+            secondary: '#7C3AED', // Vibrant purple
+            accent: '#38B2AC', // Teal
+            danger: '#F56565', // Soft red
+            muted: '#A0AEC0', // Light gray
+            card: '#F7FAFC', // Light card background
+            glass: 'rgba(255, 255, 255, 0.1)',
+            glassBorder: 'rgba(255, 255, 255, 0.2)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+            'pulse': 'pulse 0.2s ease-in-out',
+            'bounce': 'bounce 0.3s ease-in-out',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+            pulse: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' } },
+            bounce: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
+          },
+          boxShadow: { 'card': '0 4px 20px rgba(0, 0, 0, 0.05)', 'card-hover': '0 6px 24px rgba(0, 0, 0, 0.1)' },
+          scrollbarWidth: { 'thin': 'thin' },
+        },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #7C3AED, #38B2AC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .input-focus {
+      transition: all 0.3s ease;
+    }
+    .input-focus:focus {
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.3);
+      border-color: #38B2AC;
+    }
+    tr { transition: background-color 0.2s ease, transform 0.2s ease; }
+    tr:hover { transform: scale(1.01); }
+    .toast { transition: all 0.3s ease; }
+    .custom-scroll::-webkit-scrollbar { width: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #EDF2F7; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #6B46C1; }
+    .dark .custom-scroll::-webkit-scrollbar-track { background: #2D3748; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #38B2AC; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb:hover { background: #2C7A7B; }
+  </style>
+</head>
+<body class="flex bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 min-h-screen transition-all duration-300">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-primary to-secondary text-white glassmorphism transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 shadow-lg">
+    <div class="p-6 flex items-center gap-3">
+      <i class="fas fa-briefcase text-2xl"></i>
+      <h2 class="text-xl font-semibold">CBSL</h2>
+    </div>
+    <nav class="mt-4 space-y-2">
+      <a href="dashboard.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="employee.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-user"></i> Employee Portal</a>
+      <a href="incharge.html" class="flex items-center gap-3 px-6 py-3 bg-glass rounded-lg text-white font-semibold"><i class="fas fa-user-tie"></i> In-Charge Portal</a>
+      <a href="view-logs.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-calendar-check"></i> View Logs</a>
+      <a href="login.html" id="logoutButton" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 lg:ml-64 p-6">
+    <div class="flex justify-between items-center mb-6">
+      <button id="menuToggle" class="lg:hidden p-3 bg-primary text-white rounded-full hover:bg-secondary transition-colors"><i class="fas fa-bars"></i></button>
+      <button id="darkModeToggle" class="p-3 bg-accent text-white rounded-full hover:bg-teal-600 transition-colors" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+    <div class="max-w-6xl mx-auto mt-6">
+      <div class="glassmorphism rounded-3xl shadow-card p-8 animate-slide-up">
+        <h2 class="text-3xl font-bold text-center gradient-text mb-8 flex items-center justify-center gap-3">
+          <i class="fas fa-user-tie"></i> In-Charge Portal
+        </h2>
+
+        <!-- Employee Management -->
+        <div class="mb-12">
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+            <i class="fas fa-users text-secondary"></i> Employee Management
+            <button id="refreshEmployees" class="ml-4 p-2 bg-secondary text-white rounded-full hover:bg-purple-800 transition-colors" title="Refresh Employees">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </h3>
+          <!-- Add Employee Form -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Add New Employee</h4>
+            <form id="addEmployeeForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="addEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Employee ID</label>
+                <input type="text" id="addEmpId" name="addEmpId" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" placeholder="E.g., EMP103">
+              </div>
+              <div>
+                <label for="addName" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Name</label>
+                <input type="text" id="addName" name="addName" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" placeholder="E.g., Charlie Brown">
+              </div>
+              <div class="md:col-span-2 flex justify-center">
+                <button type="submit" class="bg-accent hover:bg-teal-600 text-white px-8 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
+                  <i class="fas fa-plus"></i> Add Employee
+                </button>
+              </div>
+            </form>
+          </div>
+          <!-- Update Employee Form -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Update Employee</h4>
+            <form id="updateEmployeeForm" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label for="selectEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Select Employee</label>
+                <select id="selectEmpId" name="selectEmpId" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus">
+                  <option value="">Select Employee</option>
+                </select>
+              </div>
+              <div>
+                <label for="newEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">New Employee ID</label>
+                <input type="text" id="newEmpId" name="newEmpId" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" placeholder="E.g., EMP101">
+              </div>
+              <div>
+                <label for="newName" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">New Name</label>
+                <input type="text" id="newName" name="newName" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" placeholder="E.g., Alice Johnson">
+              </div>
+              <div class="md:col-span-3 flex justify-center">
+                <button type="submit" class="bg-accent hover:bg-teal-600 text-white px-8 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
+                  <i class="fas fa-save"></i> Update Employee
+                </button>
+              </div>
+            </form>
+          </div>
+          <!-- Employee List -->
+          <div class="max-h-[300px] overflow-y-auto rounded-2xl border border-gray-200 dark:border-gray-600 bg-card dark:bg-gray-800 shadow-card custom-scroll">
+            <table class="min-w-full table-auto border-collapse" aria-label="Employee List">
+              <thead class="bg-secondary text-white sticky top-0 z-10">
+                <tr>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Employee ID</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Name</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeeTableBody" class="divide-y divide-gray-200 dark:divide-gray-600 text-gray-600 dark:text-gray-300">
+                <!-- Dynamic rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Task Assignment Form -->
+        <div class="mb-12">
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+            <i class="fas fa-tasks text-secondary"></i> Assign a Task
+          </h3>
+          <form id="taskForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="relative">
+              <label for="taskEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Employee ID</label>
+              <select id="taskEmpId" name="taskEmpId" required class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus appearance-none" aria-label="Select Employee ID">
+                <option value="">Select Employee</option>
+              </select>
+              <i class="fas fa-id-badge absolute left-3 top-10 text-muted"></i>
+            </div>
+            <div>
+              <label for="taskTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Task Title</label>
+              <input type="text" id="taskTitle" name="taskTitle" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" placeholder="E.g., Complete Project X">
+            </div>
+            <div>
+              <label for="dueDate" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Due Date</label>
+              <input type="date" id="dueDate" name="dueDate" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" min="2025-06-16">
+            </div>
+            <div class="md:col-span-2 flex justify-center">
+              <button type="submit" class="bg-accent hover:bg-teal-600 text-white px-8 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
+                <i class="fas fa-paper-plane"></i> Assign Task
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- All Tasks -->
+        <div class="mb-12">
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+            <i class="fas fa-tasks text-secondary"></i> All Tasks
+            <button id="refreshTasks" class="ml-4 p-2 bg-secondary text-white rounded-full hover:bg-purple-800 transition-colors" title="Refresh Tasks">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </h3>
+          <div class="max-h-[300px] overflow-y-auto rounded-2xl border border-gray-200 dark:border-gray-600 bg-card dark:bg-gray-800 shadow-card custom-scroll">
+            <table class="min-w-full table-auto border-collapse" aria-label="All Tasks">
+              <thead class="bg-secondary text-white sticky top-0 z-10">
+                <tr>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Title</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Due Date</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Employee ID</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Taken</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Progress</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody" class="divide-y divide-gray-200 dark:divide-gray-600 text-gray-600 dark:text-gray-300">
+                <!-- Dynamic rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Leave Requests -->
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+            <i class="fas fa-calendar-plus text-secondary"></i> Leave Requests
+            <button id="refreshLeaves" class="ml-4 p-2 bg-secondary text-white rounded-full hover:bg-purple-800 transition-colors" title="Refresh Leaves">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+          </h3>
+          <div class="max-h-[300px] overflow-y-auto rounded-2xl border border-gray-200 dark:border-gray-600 bg-card dark:bg-gray-800 shadow-card custom-scroll">
+            <table class="min-w-full table-auto border-collapse" aria-label="Leave Requests">
+              <thead class="bg-secondary text-white sticky top-0 z-10">
+                <tr>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Reason</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Start Date</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">End Date</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Employee ID</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Status</th>
+                  <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leaveTableBody" class="divide-y divide-gray-200 dark:divide-gray-600 text-gray-600 dark:text-gray-300">
+                <!-- Dynamic rows will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-6 right-6 bg-accent text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast" role="alert">
+          Action completed!
+        </div>
+      </div>
+    </div>
+  </main> 
+<script>
+  let notifications = [];
+
+  // Initialize IndexedDB
+  let db;
+  const dbName = "EmployeePortalDB";
+  const dbVersion = 2; // Incremented to apply new data
+
+  function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, dbVersion);
+
+      request.onupgradeneeded = (event) => {
+        db = event.target.result;
+
+        // Create object stores
+        if (!db.objectStoreNames.contains("employees")) {
+          db.createObjectStore("employees", { keyPath: "emp_id" });
+        }
+        if (!db.objectStoreNames.contains("tasks")) {
+          db.createObjectStore("tasks", { keyPath: "id", autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains("leaves")) {
+          db.createObjectStore("leaves", { keyPath: "id", autoIncrement: true });
+        }
+
+        // Populate initial data
+        const tx = event.target.transaction;
+        const employeeStore = tx.objectStore("employees");
+        const taskStore = tx.objectStore("tasks");
+        const leaveStore = tx.objectStore("leaves");
+
+        // Updated employees
+        const employees = [
+          { emp_id: "EMP101", name: "Alice Johnson" },
+          { emp_id: "EMP102", name: "Bob Wilson" },
+        ];
+        employees.forEach(emp => employeeStore.add(emp));
+
+        // Updated tasks
+        const tasks = [
+          { title: "Complete Project X", dueDate: "2025-06-30", taken: "Not Taken", progress: "Not Started", emp_id: "EMP101" },
+          { title: "Review Code", dueDate: "2025-06-25", taken: "Taken", progress: "In Progress", emp_id: "EMP101" },
+        ];
+        tasks.forEach(task => taskStore.add(task));
+
+        // Updated leaves
+        const leaves = [
+          { reason: "Medical", startDate: "2025-06-20", endDate: "2025-06-22", status: "Pending", emp_id: "EMP101" },
+        ];
+        leaves.forEach(leave => leaveStore.add(leave));
+      };
+
+      request.onsuccess = (event) => {
+        db = event.target.result;
+        resolve(db);
+      };
+
+      request.onerror = (event) => {
+        console.error("IndexedDB error:", event.target.error);
+        reject(event.target.error);
+      };
+    });
+  }
+
+  function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = `fixed bottom-6 right-6 ${isError ? "bg-danger" : "bg-accent"} text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast`;
+    toast.classList.remove("opacity-0", "translate-y-4", "pointer-events-none");
+    toast.classList.add("opacity-100", "translate-y-0", "pointer-events-auto");
+    setTimeout(() => {
+      toast.classList.add("opacity-0", "translate-y-4", "pointer-events-none");
+      toast.classList.remove("opacity-100", "translate-y-0", "pointer-events-auto");
+    }, 3000);
+    if (!isError) {
+      notifications.push(message);
+    }
+  }
+
+  async function updateEmployee(oldEmpId, newEmpId, newName) {
+    try {
+      if (!db) await initIndexedDB();
+      const tx = db.transaction(["employees", "tasks", "leaves"], "readwrite");
+      const employeeStore = tx.objectStore("employees");
+      const taskStore = tx.objectStore("tasks");
+      const leaveStore = tx.objectStore("leaves");
+
+      // Update employee
+      const employee = await new Promise((resolve, reject) => {
+        const req = employeeStore.get(oldEmpId);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      if (!employee) {
+        showToast(`Employee ${oldEmpId} not found.`, true);
+        return;
+      }
+      await new Promise((resolve, reject) => {
+        const req = employeeStore.delete(oldEmpId);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+      await new Promise((resolve, reject) => {
+        const req = employeeStore.add({ emp_id: newEmpId, name: newName });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+
+      // Update tasks with new emp_id
+      const tasks = await new Promise((resolve, reject) => {
+        const req = taskStore.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      for (const task of tasks.filter(t => t.emp_id === oldEmpId)) {
+        task.emp_id = newEmpId;
+        await new Promise((resolve, reject) => {
+          const req = taskStore.put(task);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      // Update leaves with new emp_id
+      const leaves = await new Promise((resolve, reject) => {
+        const req = leaveStore.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      for (const leave of leaves.filter(l => l.emp_id === oldEmpId)) {
+        leave.emp_id = newEmpId;
+        await new Promise((resolve, reject) => {
+          const req = leaveStore.put(leave);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      showToast(`Employee updated to ${newEmpId} - ${newName}`);
+      loadEmployees();
+      loadTasks();
+      loadLeaves();
+    } catch (err) {
+      console.error("Error updating employee:", err);
+      showToast(`Failed to update employee: ${err.message}`, true);
+    }
+  }
+
+  async function loadEmployees() {
+    try {
+      if (!db) await initIndexedDB();
+      const tx = db.transaction(["employees"], "readonly");
+      const store = tx.objectStore("employees");
+      const request = store.getAll();
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          const employees = request.result;
+          console.log("Employees fetched:", employees);
+          const empTableBody = document.getElementById("employeeTableBody");
+          const taskEmpIdSelect = document.getElementById("taskEmpId");
+          const selectEmpId = document.getElementById("selectEmpId");
+          empTableBody.innerHTML = "";
+          taskEmpIdSelect.innerHTML = '<option value="">Select Employee</option>';
+          selectEmpId.innerHTML = '<option value="">Select Employee</option>';
+          if (employees.length === 0) {
+            empTableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-sm text-muted dark:text-gray-400">No employees found.</td></tr>`;
+            return resolve();
+          }
+          employees.forEach(emp => {
+            const row = document.createElement("tr");
+            row.className = "even:bg-card dark:even:bg-gray-700 hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-all";
+            row.innerHTML = `
+              <td class="px-6 py-4 text-sm">${emp.emp_id}</td>
+              <td class="px-6 py-4 text-sm">${emp.name}</td>
+              <td class="px-6 py-4 text-sm">
+                <button class="edit-employee bg-accent text-white px-3 py-1 rounded-lg text-xs hover:bg-teal-600 transition-colors" data-emp-id="${emp.emp_id}" data-name="${emp.name}">Edit</button>
+              </td>
+            `;
+            empTableBody.appendChild(row);
+
+            const taskOption = document.createElement("option");
+            taskOption.value = emp.emp_id;
+            taskOption.textContent = `${emp.emp_id} - ${emp.name}`;
+            taskEmpIdSelect.appendChild(taskOption);
+
+            const selectOption = document.createElement("option");
+            selectOption.value = emp.emp_id;
+            selectOption.textContent = `${emp.emp_id} - ${emp.name}`;
+            selectEmpId.appendChild(selectOption);
+          });
+
+          document.querySelectorAll(".edit-employee").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const empId = btn.dataset.empId;
+              const name = btn.dataset.name;
+              document.getElementById("selectEmpId").value = empId;
+              document.getElementById("newEmpId").value = empId;
+              document.getElementById("newName").value = name;
+            });
+          });
+
+          resolve();
+        };
+        request.onerror = () => {
+          console.error("Error loading employees:", request.error);
+          showToast(`Failed to load employees: ${request.error.message}`, true);
+          reject(request.error);
+        };
+      });
+    } catch (err) {
+      console.error("Error loading employees:", err);
+      showToast(`Failed to load employees: ${err.message}`, true);
+    }
+  }
+
+  async function loadTasks() {
+    try {
+      if (!db) await initIndexedDB();
+      const tx = db.transaction(["tasks"], "readonly");
+      const store = tx.objectStore("tasks");
+      const request = store.getAll();
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          const tasks = request.result;
+          console.log("Tasks fetched:", tasks);
+          const tbody = document.getElementById("taskTableBody");
+          tbody.innerHTML = "";
+          if (tasks.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-muted dark:text-gray-400">No tasks assigned.</td></tr>`;
+            return resolve();
+          }
+          tasks.forEach(task => {
+            const row = document.createElement("tr");
+            row.className = "even:bg-card dark:even:bg-gray-700 hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-all";
+            row.innerHTML = `
+              <td class="px-6 py-4 text-sm">${task.title}</td>
+              <td class="px-6 py-4 text-sm">${new Date(task.dueDate).toLocaleDateString("en-US")}</td>
+              <td class="px-6 py-4 text-sm">${task.emp_id}</td>
+              <td class="px-6 py-4 text-sm">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium
+                  ${task.taken === "Taken" ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100" :
+                    "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100"}">
+                  ${task.taken}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm">${task.progress}</td>
+            `;
+            tbody.appendChild(row);
+          });
+          resolve();
+        };
+        request.onerror = () => {
+          console.error("Error loading tasks:", request.error);
+          showToast(`Failed to load tasks: ${request.error.message}`, true);
+          reject(request.error);
+        };
+      });
+    } catch (err) {
+      console.error("Error loading tasks:", err);
+      showToast(`Failed to load tasks: ${err.message}`, true);
+    }
+  }
+
+  async function loadLeaves() {
+    try {
+      if (!db) await initIndexedDB();
+      const tx = db.transaction(["leaves"], "readonly");
+      const store = tx.objectStore("leaves");
+      const request = store.getAll();
+
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          const leaves = request.result;
+          console.log("Leaves fetched:", leaves);
+          const tbody = document.getElementById("leaveTableBody");
+          tbody.innerHTML = "";
+          if (leaves.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-muted dark:text-gray-400">No leave requests found.</td></tr>`;
+            return resolve();
+          }
+          leaves.forEach(leave => {
+            const row = document.createElement("tr");
+            row.className = "even:bg-card dark:even:bg-gray-700 hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-all";
+            row.innerHTML = `
+              <td class="px-6 py-4 text-sm">${leave.reason}</td>
+              <td class="px-6 py-4 text-sm">${new Date(leave.startDate).toLocaleDateString("en-US")}</td>
+              <td class="px-6 py-4 text-sm">${new Date(leave.endDate).toLocaleDateString("en-US")}</td>
+              <td class="px-6 py-4 text-sm">${leave.emp_id}</td>
+              <td class="px-6 py-4 text-sm">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium
+                  ${leave.status === "Approved" ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100" :
+                    leave.status === "Rejected" ? "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100" :
+                    "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100"}">
+                  ${leave.status}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                ${leave.status === "Pending" ? `
+                  <button class="approve-leave bg-green-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-green-600 transition-colors" data-id="${leave.id}">Approve</button>
+                  <button class="reject-leave bg-danger text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600 transition-colors" data-id="${leave.id}">Reject</button>
+                ` : ""}
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          document.querySelectorAll(".approve-leave").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const leaveId = parseInt(btn.dataset.id);
+              try {
+                const tx = db.transaction(["leaves"], "readwrite");
+                const store = tx.objectStore("leaves");
+                const leave = await new Promise((res, rej) => {
+                  const req = store.get(leaveId);
+                  req.onsuccess = () => res(req.result);
+                  req.onerror = () => rej(req.error);
+                });
+                leave.status = "Approved";
+                const updateRequest = store.put(leave);
+                await new Promise((res, rej) => {
+                  updateRequest.onsuccess = () => res();
+                  updateRequest.onerror = () => rej(updateRequest.error);
+                });
+                showToast("Leave approved successfully!");
+                loadLeaves();
+              } catch (err) {
+                console.error("Error approving leave:", err);
+                showToast(`Failed to approve leave: ${err.message}`, true);
+              }
+            });
+          });
+
+          document.querySelectorAll(".reject-leave").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              const leaveId = parseInt(btn.dataset.id);
+              try {
+                const tx = db.transaction(["leaves"], "readwrite");
+                const store = tx.objectStore("leaves");
+                const leave = await new Promise((res, rej) => {
+                  const req = store.get(leaveId);
+                  req.onsuccess = () => res(req.result);
+                  req.onerror = () => rej(req.error);
+                });
+                leave.status = "Rejected";
+                const updateRequest = store.put(leave);
+                await new Promise((res, rej) => {
+                  updateRequest.onsuccess = () => res();
+                  updateRequest.onerror = () => rej(updateRequest.error);
+                });
+                showToast("Leave rejected successfully!");
+                loadLeaves();
+              } catch (err) {
+                console.error("Error rejecting leave:", err);
+                showToast(`Failed to reject leave: ${err.message}`, true);
+              }
+            });
+          });
+
+          resolve();
+        };
+        request.onerror = () => {
+          console.error("Error loading leaves:", request.error);
+          showToast(`Failed to load leaves: ${request.error.message}`, true);
+          reject(request.error);
+        };
+      });
+    } catch (err) {
+      console.error("Error loading leaves:", err);
+      showToast(`Failed to load leaves: ${err.message}`, true);
+    }
+  }
+
+  document.getElementById("taskForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const empId = document.getElementById("taskEmpId").value;
+    const title = document.getElementById("taskTitle").value;
+    const dueDate = document.getElementById("dueDate").value;
+
+    if (!empId || !title || !dueDate) {
+      showToast("Please fill out all fields.", true);
+      return;
+    }
+
+    try {
+      if (!db) await initIndexedDB();
+      const tx = db.transaction(["tasks"], "readwrite");
+      const store = tx.objectStore("tasks");
+      const task = {
+        emp_id: empId,
+        title,
+        dueDate,
+        taken: "Not Taken",
+        progress: "Not Started",
+      };
+      const request = store.add(task);
+
+      await new Promise((resolve, reject) => {
+        request.onsuccess = () => {
+          showToast("Task assigned successfully!");
+          document.getElementById("taskForm").reset();
+          loadTasks();
+          resolve();
+        };
+        request.onerror = () => {
+          console.error("Error assigning task:", request.error);
+          showToast(`Failed to assign task: ${request.error.message}`, true);
+          reject(request.error);
+        };
+      });
+    } catch (err) {
+      console.error("Error assigning task:", err);
+      showToast(`Failed to assign task: ${err.message}`, true);
+    }
+  });
+
+  document.getElementById("updateEmployeeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const oldEmpId = document.getElementById("selectEmpId").value;
+    const newEmpId = document.getElementById("newEmpId").value;
+    const newName = document.getElementById("newName").value;
+
+    if (!oldEmpId || !newEmpId || !newName) {
+      showToast("Please fill out all fields.", true);
+      return;
+    }
+
+    await updateEmployee(oldEmpId, newEmpId, newName);
+    document.getElementById("updateEmployeeForm").reset();
+  });
+
+  document.getElementById("refreshEmployees").addEventListener("click", loadEmployees);
+  document.getElementById("refreshTasks").addEventListener("click", loadTasks);
+  document.getElementById("refreshLeaves").addEventListener("click", loadLeaves);
+
+  document.getElementById("menuToggle").addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("-translate-x-full");
+  });
+
+  document.getElementById("darkModeToggle").addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    const icon = document.getElementById("darkModeToggle").querySelector("i");
+    icon.classList.toggle("fa-moon");
+    icon.classList.toggle("fa-sun");
+  });
+
+  document.getElementById("logoutButton").addEventListener("click", (e) => {
+    e.preventDefault();
+    showToast("Logged out successfully!");
+    setTimeout(() => (window.location.href = "login.html"), 1000);
+  });
+
+  window.addEventListener("load", async () => {
+    try {
+      await loadEmployees();
+      await loadTasks();
+      await loadLeaves();
+    } catch (err) {
+      console.error("Initialization error:", err);
+    }
+  });
+</script>
+</body>
+</html>

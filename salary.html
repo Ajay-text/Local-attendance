@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary Report - CBSL</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#06B6D4',
+            accent: '#3B82F6',
+            darkBg: '#1F2937',
+            lightBg: '#F9FAFB',
+            muted: '#6B7280',
+          },
+          boxShadow: {
+            'glass': '0 8px 32px rgba(0, 0, 0, 0.1)',
+            'input': 'inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.7)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'scale-up': 'scaleUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            scaleUp: {
+              '0%': { transform: 'scale(0.95)' },
+              '100%': { transform: 'scale(1)' },
+            },
+          },
+        },
+      },
+      darkMode: 'class',
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #E0F7FA 0%, #BFDBFE 100%);
+      min-height: 100vh;
+      transition: background 0.3s ease;
+    }
+    .dark body {
+      background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    .dark .glass-card {
+      background: rgba(31, 41, 55, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .input-field {
+      transition: all 0.3s ease;
+      border-radius: 0.75rem;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+    }
+    .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    .btn {
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body class="py-12 px-4">
+  <div class="max-w-3xl mx-auto glass-card rounded-2xl shadow-glass overflow-hidden animate-fade-in">
+    <div class="bg-gradient-to-r from-primary to-accent p-8 text-center">
+      <div class="flex justify-center mb-4">
+        <img src="assets/images/logo.png" alt="CBSL Logo" class="h-16 w-auto animate-float" onerror="this.src='https://via.placeholder.com/64';" />
+      </div>
+      <h2 class="text-3xl font-bold text-white">CBSL Salary Dashboard</h2>
+      <p class="text-white/80 mt-2 text-sm">Calculate employee salaries with flexible date ranges</p>
+    </div>
+
+    <div class="p-8 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-id-badge mr-2 text-accent"></i> Employee ID
+          </label>
+          <select id="empId" class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent">
+            <option value="">-- Select Employee --</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-user mr-2 text-accent"></i> Employee Name
+          </label>
+          <input id="empName" type="text" readonly 
+                 class="w-full input-field px-4 py-3 bg-gray-100/50 dark:bg-gray-600/50 text-gray-900 dark:text-white cursor-not-allowed" 
+                 placeholder="Auto-filled based on ID" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-alt mr-2 text-accent"></i> Start Date
+          </label>
+          <input id="startDate" type="date" 
+                 class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent" />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-alt mr-2 text-accent"></i> End Date
+          </label>
+          <input id="endDate" type="date" 
+                 class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-month mr-2 text-accent"></i> Month
+          </label>
+          <select id="month" class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent">
+            <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+            <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+            <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-year mr-2 text-accent"></i> Year
+          </label>
+          <input id="year" type="number" value="2025" 
+                 class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent" />
+        </div>
+      </div>
+
+      <div id="salaryPreviewCard" class="hidden p-4 rounded-xl bg-gradient-to-r from-white/90 to-gray-50/90 dark:from-gray-700/90 dark:to-gray-600/90 shadow-glass border border-gray-200/50 dark:border-gray-600/50">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-coins text-yellow-500 text-2xl animate-float"></i>
+          <div>
+            <p class="text-sm text-muted">Monthly Base Salary</p>
+            <p id="previewSalary" class="text-xl font-semibold text-gray-800 dark:text-white">₹0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-rupee-sign mr-2 text-accent"></i> Base Salary (Monthly, ₹)
+          </label>
+          <input id="roleSalary" type="number" readonly 
+                 class="w-full input-field px-4 py-3 bg-gray-100/50 dark:bg-gray-600/50 text-gray-900 dark:text-white cursor-not-allowed" 
+                 placeholder="Auto-filled based on ID" />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-check mr-2 text-accent"></i> Days Present
+          </label>
+          <input id="daysPresent" type="number" readonly 
+                 class="w-full input-field px-4 py-3 bg-gray-100/50 dark:bg-gray-600/50 text-gray-900 dark:text-white cursor-not-allowed" 
+                 placeholder="Fetched from attendance" />
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <i class="fas fa-calendar-day mr-2 text-accent"></i> Total Days in Range
+        </label>
+        <input id="totalDays" type="number" readonly 
+               class="w-full input-field px-4 py-3 bg-gray-100/50 dark:bg-gray-600/50 text-gray-900 dark:text-white cursor-not-allowed" 
+               placeholder="Calculated from date range" />
+      </div>
+
+      <button onclick="calculateSalary()" 
+              class="w-full bg-gradient-to-r from-accent to-primary text-white font-semibold py-3 px-6 rounded-xl btn shadow-lg mt-6">
+        <i class="fas fa-calculator mr-2"></i> Calculate Salary
+      </button>
+
+      <div class="mt-8 p-6 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-cyan-100 dark:border-gray-600">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center">
+          <i class="fas fa-file-invoice-dollar mr-2 text-primary"></i> Salary Calculation
+        </h3>
+        <div id="salaryResult" class="text-2xl font-bold text-gray-800 dark:text-white">
+          ₹0
+        </div>
+        <p class="text-sm text-muted mt-2">Based on days present and base salary</p>
+      </div>
+    </div>
+
+    <div class="bg-gray-50/80 dark:bg-gray-800/80 p-4 text-center text-sm text-muted border-t border-gray-200/50 dark:border-gray-700/50">
+      <div class="flex justify-between items-center">
+        <a href="main.html" class="text-accent hover:underline">
+          <i class="fas fa-arrow-left mr-1"></i> Back to Main
+        </a>
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="darkModeToggle" class="accent-accent w-4 h-4 rounded" onchange="toggleDarkMode()">
+          <span class="text-sm font-medium text-muted">Dark Mode</span>
+        </label>
+      </div>
+      <p class="mt-2">© 2025 CBSL Attendance System | v2.5.0</p>
+    </div>
+  </div>
+
+  <script>
+    let employeesCache = [];
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+    }
+
+    function initializeDarkMode() {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkModeToggle').checked = true;
+      }
+    }
+
+    async function loadEmployees() {
+      try {
+        const res = await fetch('http://localhost:3000/employees');
+        if (!res.ok) throw new Error(`Failed to fetch employees: ${res.status} ${res.statusText}`);
+        employeesCache = await res.json();
+        if (!Array.isArray(employeesCache)) throw new Error('Invalid data format: Expected an array');
+        const empIdSelect = document.getElementById('empId');
+        empIdSelect.innerHTML = '<option value="">-- Select Employee --</option>';
+        employeesCache.forEach(emp => {
+          if (emp.emp_id && emp.name) {
+            const option = document.createElement('option');
+            option.value = emp.emp_id;
+            option.textContent = `${emp.emp_id} - ${emp.name}`;
+            empIdSelect.appendChild(option);
+          }
+        });
+        if (empIdSelect.options.length === 1) {
+          alert('No employees found in the database.');
+        }
+      } catch (err) {
+        console.error('Error loading employees:', err);
+        alert(`Failed to load employees: ${err.message}. Please ensure the server is running and database is accessible.`);
+      }
+    }
+
+    async function fetchDaysPresent(empId, startDate, endDate) {
+      try {
+        const res = await fetch(`http://localhost:3000/attendance?empId=${encodeURIComponent(empId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`);
+        if (!res.ok) throw new Error(`Failed to fetch attendance: ${res.status} ${res.statusText}`);
+        const attendance = await res.json();
+        const uniqueDays = new Set(attendance.filter(a => a.time && a.time.includes('IN')).map(a => a.date));
+        return uniqueDays.size;
+      } catch (err) {
+        console.error('Error fetching attendance:', err);
+        alert(`Failed to fetch attendance: ${err.message}`);
+        return 0;
+      }
+    }
+
+    function calculateTotalDays(startDate, endDate) {
+      if (!startDate || !endDate) return 0;
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (end < start) return 0;
+      const diffTime = Math.abs(end - start);
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    document.getElementById('empId').addEventListener('change', async function () {
+      const empId = this.value;
+      const empNameInput = document.getElementById('empName');
+      const previewCard = document.getElementById('salaryPreviewCard');
+      const previewSalary = document.getElementById('previewSalary');
+      const roleSalary = document.getElementById('roleSalary');
+      const daysPresentInput = document.getElementById('daysPresent');
+      const totalDaysInput = document.getElementById('totalDays');
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (!empId) {
+        empNameInput.value = '';
+        previewCard.classList.add('hidden');
+        roleSalary.value = '';
+        daysPresentInput.value = '';
+        totalDaysInput.value = '';
+        return;
+      }
+
+      try {
+        const employee = employeesCache.find(emp => emp.emp_id === empId);
+        if (!employee) throw new Error('Employee not found');
+        const { name, base_salary } = employee;
+
+        empNameInput.value = name || 'Unknown';
+        roleSalary.value = base_salary || 0;
+        previewSalary.textContent = `₹${(base_salary || 0).toLocaleString('en-IN')}`;
+        previewCard.classList.remove('hidden');
+
+        if (startDate && endDate) {
+          const daysPresent = await fetchDaysPresent(empId, startDate, endDate);
+          const totalDays = calculateTotalDays(startDate, endDate);
+          daysPresentInput.value = daysPresent;
+          totalDaysInput.value = totalDays;
+        } else {
+          daysPresentInput.value = '';
+          totalDaysInput.value = '';
+        }
+      } catch (err) {
+        console.error('Error fetching employee data:', err);
+        alert(`Failed to load employee data: ${err.message}`);
+        empNameInput.value = '';
+        previewCard.classList.add('hidden');
+        roleSalary.value = '';
+        daysPresentInput.value = '';
+        totalDaysInput.value = '';
+      }
+    });
+
+    ['startDate', 'endDate'].forEach(id => {
+      document.getElementById(id).addEventListener('change', async () => {
+        const empId = document.getElementById('empId').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const daysPresentInput = document.getElementById('daysPresent');
+        const totalDaysInput = document.getElementById('totalDays');
+
+        if (!empId || !startDate || !endDate) {
+          daysPresentInput.value = '';
+          totalDaysInput.value = '';
+          return;
+        }
+
+        if (new Date(endDate) < new Date(startDate)) {
+          alert('End date must be after start date');
+          document.getElementById('endDate').value = '';
+          daysPresentInput.value = '';
+          totalDaysInput.value = '';
+          return;
+        }
+
+        try {
+          const daysPresent = await fetchDaysPresent(empId, startDate, endDate);
+          const totalDays = calculateTotalDays(startDate, endDate);
+          daysPresentInput.value = daysPresent;
+          totalDaysInput.value = totalDays;
+        } catch (err) {
+          console.error('Error updating days:', err);
+          alert(`Failed to update days: ${err.message}`);
+          daysPresentInput.value = '';
+          totalDaysInput.value = '';
+        }
+      });
+    });
+
+    async function calculateSalary() {
+      const empId = document.getElementById('empId').value;
+      const empName = document.getElementById('empName').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const base = parseFloat(document.getElementById('roleSalary').value);
+      const present = parseInt(document.getElementById('daysPresent').value);
+      const total = parseInt(document.getElementById('totalDays').value);
+      const resultDiv = document.getElementById('salaryResult');
+
+      if (!empId || !empName) {
+        resultDiv.innerHTML = `<span class="text-red-500">Please select an employee</span>`;
+        resultDiv.classList.remove('text-gray-800', 'dark:text-white');
+        return;
+      }
+
+      if (!startDate || !endDate) {
+        resultDiv.innerHTML = `<span class="text-red-500">Please select a valid date range</span>`;
+        resultDiv.classList.remove('text-gray-800', 'dark:text-white');
+        return;
+      }
+
+      if (!base || isNaN(present) || !total || present > total) {
+        resultDiv.innerHTML = `<span class="text-red-500">Please ensure valid salary, days present, and date range</span>`;
+        resultDiv.classList.remove('text-gray-800', 'dark:text-white');
+        return;
+      }
+
+      const perDay = base / total;
+      const finalSalary = Math.round(perDay * present);
+
+      const formattedSalary = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(finalSalary).replace('₹', '₹');
+
+      resultDiv.innerHTML = `Salary for ${empId} - ${empName}: ${formattedSalary}`;
+      resultDiv.classList.add('text-gray-800', 'dark:text-white');
+      resultDiv.classList.add('animate-scale-up');
+      setTimeout(() => resultDiv.classList.remove('animate-scale-up'), 300);
+    }
+
+    window.onload = () => {
+      initializeDarkMode();
+      loadEmployees();
+      const now = new Date();
+      document.getElementById('month').value = now.getMonth() + 1;
+      document.getElementById('year').value = now.getFullYear();
+      document.getElementById('startDate').value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
+      document.getElementById('endDate').value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()}`;
+      document.getElementById('month').addEventListener('change', updateDateRange);
+      document.getElementById('year').addEventListener('change', updateDateRange);
+    };
+
+    function updateDateRange() {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      if (month && year) {
+        document.getElementById('startDate').value = `${year}-${month.padStart(2, '0')}-01`;
+        document.getElementById('endDate').value = `${year}-${month.padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+        document.getElementById('startDate').dispatchEvent(new Event('change'));
+      }
+    }
+  </script>
+</body>
+</html>

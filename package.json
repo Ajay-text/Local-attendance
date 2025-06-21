@@ -1,0 +1,27 @@
+{
+  "name": "employee-backend",
+  "version": "1.0.0",
+  "description": "Backend for employee registration and login",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "register": "node register.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "connect-mysql-session": "^0.1.1",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "csv-stringify": "^6.5.2",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1"
+  },
+  "keywords": []
+}

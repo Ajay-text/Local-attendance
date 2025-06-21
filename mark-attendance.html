@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-all duration-300">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Attendance System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2D3748',
+            secondary: '#7C3AED',
+            accent: '#38B2AC',
+            danger: '#F56565',
+            muted: '#A0AEC0',
+            card: '#F7FAFC',
+            glass: 'rgba(255, 255, 255, 0.1)',
+            glassBorder: 'rgba(255, 255, 255, 0.2)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+            'pulse': 'pulse 0.2s ease-in-out',
+            'bounce': 'bounce 0.3s ease-in-out',
+            'card-appear': 'cardAppear 0.5s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            pulse: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.05)' },
+            },
+            bounce: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-4px)' },
+            },
+            cardAppear: {
+              '0%': { opacity: '0', transform: 'translateY(10px) scale(0.95)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+            },
+          },
+          boxShadow: {
+            'card': '0 4px 20px rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 6px 24px rgba(0, 0, 0, 0.1)',
+          },
+          scrollbarWidth: {
+            'thin': 'thin',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #7C3AED, #38B2AC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .input-focus {
+      transition: all 0.3s ease;
+    }
+    .input-focus:focus {
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.3);
+      border-color: #38B2AC;
+    }
+    .activity-card {
+      transition: all 0.2s ease;
+    }
+    .activity-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    }
+    .toast {
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body class="flex bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 min-h-screen transition-all duration-300">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-primary to-secondary text-white glassmorphism transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 shadow-lg">
+    <div class="p-6 flex items-center gap-3">
+      <i class="fas fa-briefcase text-2xl"></i>
+      <h2 class="text-xl font-semibold">CBSL</h2>
+    </div>
+    <nav class="mt-4 space-y-2">
+      <a href="dashboard.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="mark-attendance.html" class="flex items-center gap-3 px-6 py-3 bg-glass rounded-lg text-white font-semibold"><i class="fas fa-fingerprint"></i> Mark Attendance</a>
+      <a href="view-logs.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-calendar-check"></i> View Logs</a>
+      <a href="add-employee.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-user-plus"></i> Add Employee</a>
+      <a href="salary.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-money-bill-wave"></i> Salary</a>
+      <a href="register.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-user-plus"></i> Register</a>
+      <a href="login.html" id="logoutButton" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 lg:ml-64 p-6">
+    <button id="menuToggle" class="lg:hidden p-3 bg-primary text-white rounded-full hover:bg-secondary transition-colors"><i class="fas fa-bars"></i></button>
+    <div class="max-w-7xl mx-auto mt-6 p-8 bg-card dark:bg-gray-800 rounded-3xl shadow-card hover:shadow-card-hover transition-shadow duration-300 animate-slide-up">
+      <!-- Header -->
+      <header class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold flex items-center gap-3 gradient-text"><i class="fas fa-fingerprint"></i> Employee Attendance</h2>
+        <button id="themeToggle" class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+          <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-800 dark:text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364-6.364l-1.06 1.06M6.696 17.303l-1.06 1.06m12.728 0l-1.06-1.06M6.696 6.696L5.636 5.636M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+          </svg>
+        </button>
+      </header>
+
+      <!-- Mark Attendance Box -->
+      <section class="mb-12 p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 animate-fade-in">
+        <h3 class="text-xl font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
+          <i class="fas fa-clock text-secondary"></i> Mark Attendance
+        </h3>
+        <form class="grid gap-6 md:grid-cols-3">
+          <div class="relative">
+            <label for="empId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Employee ID</label>
+            <select id="empId" onchange="autoFillName()" class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus appearance-none" aria-required="true">
+              <option value="">-- Select ID --</option>
+              <option value="V2103168007">V2103168007</option>
+              <option value="V2103168131">V2103168131</option>
+            </select>
+            <i class="fas fa-id-badge absolute left-3 top-10 text-muted"></i>
+          </div>
+          <div class="relative">
+            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Name</label>
+            <input type="text" id="name" readonly class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white" aria-readonly="true" />
+            <i class="fas fa-user absolute left-3 top-10 text-muted"></i>
+          </div>
+          <div class="relative">
+            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Date</label>
+            <input type="date" id="date" class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus" aria-required="true" />
+            <i class="fas fa-calendar absolute left-3 top-10 text-muted"></i>
+          </div>
+        </form>
+        <div class="flex flex-col sm:flex-row gap-4 mt-6">
+          <button class="flex-1 bg-accent hover:bg-teal-600 text-white py-3 rounded-lg font-medium transition-all hover:animate-bounce flex items-center justify-center gap-2" onclick="markAttendance('IN')">
+            <i class="fas fa-sign-in-alt"></i> Mark In
+          </button>
+          <button class="flex-1 bg-danger hover:bg-red-600 text-white py-3 rounded-lg font-medium transition-all hover:animate-bounce flex items-center justify-center gap-2" onclick="markAttendance('OUT')">
+            <i class="fas fa-sign-out-alt"></i> Mark Out
+          </button>
+        </div>
+        <div id="status" class="text-center text-sm font-medium text-accent dark:text-teal-400 mt-4" role="status"></div>
+      </section>
+
+      <!-- Recent Attendance Cards -->
+      <section>
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+            <i class="fas fa-history text-secondary"></i> Recent Attendance
+          </h3>
+          <div class="relative w-64">
+            <label for="filterEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Select Employee ID</label>
+            <select id="filterEmpId" onchange="loadRecentAttendance()" class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus appearance-none" aria-label="Select Employee ID" required>
+              <option value="">-- Select ID --</option>
+              <option value="V2103168007">V2103168007</option>
+              <option value="V2103168131">V2103168131</option>
+            </select>
+            <i class="fas fa-id-badge absolute left-3 top-10 text-muted"></i>
+          </div>
+        </div>
+        <div id="recentAttendance" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <!-- Dynamic attendance cards will be inserted here -->
+        </div>
+        <div class="flex justify-center mt-6">
+          <a href="view-logs.html" class="bg-secondary hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all hover:animate-bounce flex items-center gap-2">
+            <i class="fas fa-list"></i> View All Logs
+          </a>
+        </div>
+      </section>
+
+      <!-- Toast Notification -->
+      <div id="toast" class="fixed bottom-6 right-6 bg-accent text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast" role="alert">
+        Action completed!
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Employee ID to name mapping
+    const empNames = {
+      "V2103168007": "Ajay",
+      "V2103168131": "Ali"
+    };
+
+    // Toast notification
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `fixed bottom-6 right-6 ${isError ? 'bg-danger' : 'bg-accent'} text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast`;
+      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }, 3000);
+    }
+
+    // Set default date to today
+    document.getElementById("date").valueAsDate = new Date();
+
+    // Auto-fill name
+    function autoFillName() {
+      const empId = document.getElementById("empId").value;
+      document.getElementById("name").value = empNames[empId] || "";
+    }
+
+    // Mark attendance
+    function markAttendance(type) {
+      const empId = document.getElementById("empId").value.trim();
+      const name = document.getElementById("name").value.trim();
+      const date = document.getElementById("date").value;
+      // Format time to HH:MM:SS (24-hour format)
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const time = `${type} - ${hours}:${minutes}:${seconds}`;
+
+      if (!empId || !name || !date) {
+        showToast("Please fill all fields.", true);
+        return;
+      }
+
+      const data = { empId, name, date, time };
+      console.log('Sending attendance data:', data); // Debug log
+      fetch("http://localhost:3000/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.error || `HTTP error ${res.status}`); });
+          }
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById("status").innerText = `${type} recorded at ${time.split(' - ')[1]}`;
+          showToast(`${type} recorded successfully!`);
+          // Refresh cards if the marked attendance is for the filtered employee
+          const filterEmpId = document.getElementById("filterEmpId").value;
+          if (!filterEmpId || filterEmpId === empId) {
+            loadRecentAttendance();
+          }
+        })
+        .catch(err => {
+          console.error('Attendance error:', err.message); // Debug log
+          document.getElementById("status").innerText = "Failed to save attendance";
+          showToast(`Failed to save attendance: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    }
+
+    // Load recent attendance cards
+    function loadRecentAttendance() {
+      const filterEmpId = document.getElementById("filterEmpId").value;
+      if (!filterEmpId) {
+        const attendanceContainer = document.getElementById("recentAttendance");
+        attendanceContainer.innerHTML = `<p class="text-center text-muted dark:text-gray-400 col-span-full">Please select an employee to view recent attendance.</p>`;
+        return;
+      }
+
+      const url = `http://localhost:3000/attendance?empId=${encodeURIComponent(filterEmpId)}`;
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error(`Failed to load attendance (Status: ${res.status})`);
+          return res.json();
+        })
+        .then(data => {
+          const attendanceContainer = document.getElementById("recentAttendance");
+          attendanceContainer.innerHTML = "";
+
+          // Sort by date descending and take the top 5
+          const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+          if (sortedData.length === 0) {
+            attendanceContainer.innerHTML = `<p class="text-center text-muted dark:text-gray-400 col-span-full">No recent attendance for ${empNames[filterEmpId] || filterEmpId}.</p>`;
+            return;
+          }
+
+          sortedData.forEach((entry, index) => {
+            const formattedDate = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+            const card = document.createElement("div");
+            card.className = `p-4 bg-card dark:bg-gray-700 rounded-lg shadow-card activity-card animate-card-appear`;
+            card.style.animationDelay = `${index * 0.1}s`; // Staggered animation
+            card.innerHTML = `
+              <div class="flex items-center gap-3 mb-2">
+                <i class="fas ${entry.time.includes('IN') ? 'fa-sign-in-alt text-accent' : 'fa-sign-out-alt text-danger'} text-xl"></i>
+                <h4 class="text-sm font-semibold text-gray-800 dark:text-white">${entry.name}</h4>
+              </div>
+              <p class="text-xs text-muted">ID: ${entry.emp_id}</p>
+              <p class="text-xs text-muted">Date: ${formattedDate}</p>
+              <p class="text-xs text-muted">Time: ${entry.time}</p>
+            `;
+            attendanceContainer.appendChild(card);
+          });
+
+          showToast(`Recent attendance loaded for ${empNames[filterEmpId] || filterEmpId}!`);
+        })
+        .catch(err => {
+          const attendanceContainer = document.getElementById("recentAttendance");
+          attendanceContainer.innerHTML = `<p class="text-center text-danger col-span-full">Failed to load attendance: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}</p>`;
+          showToast(`Failed to load attendance: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    }
+
+    // Theme toggle
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem('darkMode', document.documentElement.classList.contains("dark"));
+      const icon = document.getElementById("themeIcon");
+      const isDark = document.documentElement.classList.contains("dark");
+      icon.innerHTML = isDark
+        ? `<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0112 21.75 9.75 9.75 0 0112 2.25c.258 0 .512.01.763.029a0.75 0.75 0 00.666-1.163 9.75 9.75 0 108.323 13.886 0.75 0.75 0 00-.666-1.163 9.718 9.718 0 01-.334-2.837z"/>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364-6.364l-1.06 1.06M6.696 17.303l-1.06 1.06m12.728 0l-1.06-1.06M6.696 6.696L5.636 5.636M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>`;
+    });
+
+    // Logout
+    document.getElementById("logoutButton").addEventListener("click", (e) => {
+      e.preventDefault();
+      fetch("http://localhost:3000/logout")
+        .then(res => {
+          if (!res.ok) throw new Error(`Failed to logout (Status: ${res.status})`);
+          return res.json();
+        })
+        .then(data => {
+          showToast("Logged out successfully!");
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1000);
+        })
+        .catch(err => {
+          showToast(`Failed to logout: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    });
+
+    // Mobile sidebar toggle
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("-translate-x-full");
+    });
+
+    // Initialize
+    window.onload = () => {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById("themeIcon").innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0112 21.75 9.75 9.75 0 0112 2.25c.258 0 .512.01.763.029a0.75 0.75 0 00.666-1.163 9.75 9.75 0 108.323 13.886 0.75 0.75 0 00-.666-1.163 9.718 9.718 0 01-.334-2.837z"/>`;
+      }
+      // Do not load cards until an employee is selected
+      loadRecentAttendance();
+    };
+  </script>
+</body>
+</html>

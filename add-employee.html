@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Employees - CBSL Attendance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1E3A8A', // Deep Blue
+            accent: '#2DD4BF',  // Soft Teal
+            muted: '#6B7280',   // Neutral Gray
+          },
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    .input-field {
+      transition: all 0.3s ease;
+    }
+    .input-field:focus {
+      border-color: #2DD4BF;
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+    tr {
+      transition: background-color 0.3s ease;
+    }
+    .modal {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
+  <div class="max-w-6xl mx-auto py-12 px-6">
+    <!-- Header -->
+    <div class="flex justify-center mb-8">
+      <img
+        src="https://i.postimg.cc/yxftJjqw/1000085792-removebg-preview.png"
+        alt="CBSL Logo"
+        class="w-24 h-24 rounded-full border-4 border-primary shadow-lg transform hover:scale-110 transition-transform duration-300 animate-fade-in"
+      />
+    </div>
+    <h2 class="text-4xl font-bold text-center text-primary dark:text-white mb-8 animate-fade-in">
+      Add New Employee
+    </h2>
+
+    <!-- Employee Count -->
+    <div class="text-center mb-6">
+      <span class="text-lg font-semibold text-muted">
+        Total Employees: <span id="employeeCount" class="text-primary dark:text-accent">0</span>
+      </span>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none flex items-center">
+      🎉 <span>Action completed!</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Form Section -->
+      <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slide-up">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label for="empId" class="block text-sm font-medium text-muted mb-1">Employee ID</label>
+              <input id="empId" type="text" placeholder="e.g. EMP001"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" required />
+            </div>
+
+            <div>
+              <label for="empName" class="block text-sm font-medium text-muted mb-1">Employee Name</label>
+              <input id="empName" type="text" placeholder="e.g. Peter"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" required />
+            </div>
+
+            <div>
+              <label for="empGender" class="block text-sm font-medium text-muted mb-1">Gender</label>
+              <select id="empGender"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none input-field" required>
+                <option value="">-- Choose Gender --</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="empSalary" class="block text-sm font-medium text-muted mb-1">Salary Per Day</label>
+              <input id="empSalary" type="number" placeholder="e.g. 500"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" required />
+            </div>
+
+            <div>
+              <label for="empPhone" class="block text-sm font-medium text-muted mb-1">Phone Number</label>
+              <input id="empPhone" type="tel" placeholder="e.g. 123-456-7890"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" required />
+            </div>
+
+            <div>
+              <label for="empEmail" class="block text-sm font-medium text-muted mb-1">Email</label>
+              <input id="empEmail" type="email" placeholder="e.g. peter@example.com"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" required />
+            </div>
+
+            <div>
+              <label for="empCity" class="block text-sm font-medium text-muted mb-1">City</label>
+              <select id="empCity"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none input-field">
+                <option value="">-- Choose City --</option>
+                <option>Mumbai</option>
+                <option>Delhi</option>
+                <option>Bangalore</option>
+                <option>Hyderabad</option>
+                <option>Chennai</option>
+                <option>Kolkata</option>
+                <option>Pune</option>
+                <option>Ahmedabad</option>
+                <option>Jaipur</option>
+                <option>Lucknow</option>
+                <option>Vijayawada</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label for="empAddress" class="block text-sm font-medium text-muted mb-1">Address</label>
+              <textarea id="empAddress" placeholder="e.g. 123 Main St, City"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" rows="3" required></textarea>
+            </div>
+
+            <div class="md:col-span-2">
+              <label for="empDepartment" class="block text-sm font-medium text-muted mb-1">Department</label>
+              <select id="empDepartment"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none input-field" required>
+                <option value="">-- Choose Department --</option>
+                <option>Technical</option>
+                <option>IT</option>
+                <option>HR</option>
+                <option>Finance</option>
+                <option>Marketing</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button onclick="addEmployee()"
+              class="bg-accent hover:bg-accent/80 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+              <i class="fas fa-plus mr-2"></i> Add Employee
+            </button>
+            <button onclick="resetForm()"
+              class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+              <i class="fas fa-undo mr-2"></i> Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Card Preview -->
+      <div class="lg:col-span-1">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slide-up">
+          <h3 class="text-lg font-semibold text-primary dark:text-accent mb-4">Profile Preview</h3>
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+            <div class="w-16 h-16 bg-primary dark:bg-accent rounded-full mx-auto flex items-center justify-center text-white text-xl font-bold mb-4" id="previewAvatar"></div>
+            <p class="text-sm text-muted">ID: <span id="previewId" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Name: <span id="previewName" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Gender: <span id="previewGender" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Salary/Day: <span id="previewSalary" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Phone: <span id="previewPhone" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Email: <span id="previewEmail" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">City: <span id="previewCity" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Address: <span id="previewAddress" class="text-gray-900 dark:text-white">N/A</span></p>
+            <p class="text-sm text-muted">Department: <span id="previewDept" class="text-gray-900 dark:text-white">N/A</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee List Section -->
+    <div class="mt-10">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-semibold text-primary dark:text-accent">Employee List</h3>
+        <div class="flex gap-4">
+          <input id="searchBar" type="text" placeholder="Search by Name or ID"
+            class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-muted focus:outline-none input-field" />
+          <button onclick="exportToCSV()"
+            class="bg-primary hover:bg-primary/80 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+            <i class="fas fa-download mr-2"></i> Export to CSV
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto rounded-xl shadow-lg">
+        <table class="min-w-full bg-white dark:bg-gray-800">
+          <thead class="bg-primary/10 dark:bg-gray-700/50 text-primary dark:text-accent">
+            <tr>
+              <th class="px-4 py-3 text-left text-sm font-semibold">ID</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Gender</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Salary/Day</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Phone</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Email</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">City</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Address</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Department</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody" class="divide-y divide-gray-200 dark:divide-gray-600"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Edit Employee Modal -->
+    <div id="editModal" class="fixed inset-0 bg-gray-900/50 flex items-center justify-center opacity-0 pointer-events-none transform scale-95">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-lg">
+        <h3 class="text-lg font-semibold text-primary dark:text-accent mb-4">Edit Employee</h3>
+        <div class="grid grid-cols-1 gap-4">
+          <input id="editEmpId" type="text" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" readonly />
+          <input id="editEmpName" type="text" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" />
+          <select id="editEmpGender" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+            <option value="">-- Choose Gender --</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+          <input id="editEmpSalary" type="number" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" />
+          <input id="editEmpPhone" type="tel" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" />
+          <input id="editEmpEmail" type="email" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" />
+          <select id="editEmpCity" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+            <option value="">-- Choose City --</option>
+            <option>Mumbai</option>
+            <option>Delhi</option>
+            <option>Bangalore</option>
+            <option>Hyderabad</option>
+            <option>Chennai</option>
+            <option>Kolkata</option>
+            <option>Pune</option>
+            <option>Ahmedabad</option>
+            <option>Jaipur</option>
+            <option>Lucknow</option>
+            <option>Others</option>
+          </select>
+          <textarea id="editEmpAddress" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" rows="3"></textarea>
+          <select id="editEmpDepartment" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
+            <option value="">-- Choose Department --</option>
+            <option>Technical</option>
+            <option>IT</option>
+            <option>HR</option>
+            <option>Finance</option>
+            <option>Marketing</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-4 mt-6">
+          <button onclick="saveEdit()"
+            class="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg">
+            Save
+          </button>
+          <button onclick="closeModal()"
+            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation and Toggles -->
+    <div class="flex justify-center items-center gap-6 mt-10">
+      <a
+        href="dashboard.html"
+        class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+      >
+        Back to Dashboard
+      </a>
+      <label class="flex items-center space-x-3 text-sm text-muted">
+        <input
+          type="checkbox"
+          id="darkModeToggle"
+          onchange="toggleDarkMode()"
+          class="accent-accent w-4 h-4 rounded focus:ring-2 focus:ring-accent"
+        />
+        <span class="font-medium">Dark Mode</span>
+      </label>
+    </div>
+
+    <p class="text-xs text-center text-muted mt-8">© CBSL Attendance System 2025</p>
+  </div>
+
+  <script>
+  let employees = [];
+  let editIndex = null;
+
+  function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+  }
+
+  function initializeDarkMode() {
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.documentElement.classList.add('dark');
+      document.getElementById('darkModeToggle').checked = true;
+    }
+  }
+
+  function showToast(message, success) {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = `${success ? '🎉' : '❌'} <span>${message}</span>`;
+    toast.className = `fixed bottom-4 right-4 text-white px-4 py-2 rounded-lg shadow-lg flex items-center ${success ? 'bg-green-500' : 'bg-red-500'}`;
+    toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    }, 3000);
+  }
+
+  function validateForm() {
+    const empId = document.getElementById('empId').value.trim();
+    const empName = document.getElementById('empName').value.trim();
+    const empGender = document.getElementById('empGender').value;
+    const empSalary = document.getElementById('empSalary').value.trim();
+    const empPhone = document.getElementById('empPhone').value.trim();
+    const empEmail = document.getElementById('empEmail').value.trim();
+    const empCity = document.getElementById('empCity').value;
+    const empAddress = document.getElementById('empAddress').value.trim();
+    const empDept = document.getElementById('empDepartment').value;
+
+    if (!empId || !empName || !empGender || !empSalary || !empPhone || !empEmail || !empAddress || !empDept) {
+      showToast('Please fill in all required fields! ❌', false);
+      return false;
+    }
+
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    if (!phoneRegex.test(empPhone)) {
+      showToast('Phone number must be in format 123-456-7890! ❌', false);
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(empEmail)) {
+      showToast('Please enter a valid email address! ❌', false);
+      return false;
+    }
+
+    return true;
+  }
+
+  function addEmployee() {
+    if (!validateForm()) return;
+
+    const empId = document.getElementById('empId').value.trim();
+    const empName = document.getElementById('empName').value.trim();
+    const empGender = document.getElementById('empGender').value;
+    const empSalary = parseFloat(document.getElementById('empSalary').value);
+    const empPhone = document.getElementById('empPhone').value.trim();
+    const empEmail = document.getElementById('empEmail').value.trim();
+    const empCity = document.getElementById('empCity').value;
+    const empAddress = document.getElementById('empAddress').value.trim();
+    const empDept = document.getElementById('empDepartment').value;
+
+    // Check if employee ID already exists
+    if (employees.some(emp => emp.emp_id === empId)) {
+      showToast('Employee ID already exists! ❌', false);
+      return;
+    }
+
+    const newEmployee = {
+      emp_id: empId,
+      name: empName,
+      gender: empGender,
+      salary_per_day: empSalary,
+      phone: empPhone,
+      email: empEmail,
+      city: empCity,
+      address: empAddress,
+      department: empDept,
+    };
+
+    employees.push(newEmployee);
+    // Save to localStorage
+    localStorage.setItem('employees', JSON.stringify(employees));
+    updateEmployeeList();
+    updateEmployeeCount();
+    showToast('Employee added successfully! 🎉', true);
+    resetForm();
+  }
+
+  function updateEmployeeList() {
+    const tbody = document.getElementById('employeeTableBody');
+    const searchQuery = document.getElementById('searchBar').value.toLowerCase();
+    tbody.innerHTML = '';
+
+    const filteredEmployees = employees.filter(emp =>
+      emp.emp_id.toLowerCase().includes(searchQuery) || emp.name.toLowerCase().includes(searchQuery)
+    );
+
+    filteredEmployees.forEach((emp, index) => {
+      const row = document.createElement('tr');
+      row.className = `hover:bg-gray-100 dark:hover:bg-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`;
+      row.innerHTML = `
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.emp_id}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.name}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.gender}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">$${emp.salary_per_day.toFixed(2)}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.phone}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.email}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.city || 'N/A'}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.address}</td>
+        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${emp.department}</td>
+        <td class="px-4 py-3 text-sm">
+          <button onclick="openEditModal(${index})" class="text-blue-500 hover:text-blue-700 mr-2">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button onclick="deleteEmployee(${index})" class="text-red-500 hover:text-red-700">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function updateEmployeeCount() {
+    const count = employees.length;
+    document.getElementById('employeeCount').textContent = count;
+  }
+
+  function resetForm() {
+    document.getElementById('empId').value = '';
+    document.getElementById('empName').value = '';
+    document.getElementById('empGender').value = '';
+    document.getElementById('empSalary').value = '';
+    document.getElementById('empPhone').value = '';
+    document.getElementById('empEmail').value = '';
+    document.getElementById('empCity').value = '';
+    document.getElementById('empAddress').value = '';
+    document.getElementById('empDepartment').value = '';
+    updateProfilePreview();
+  }
+
+  function updateProfilePreview() {
+    const empId = document.getElementById('empId').value.trim();
+    const empName = document.getElementById('empName').value.trim();
+    const empGender = document.getElementById('empGender').value;
+    const empSalary = document.getElementById('empSalary').value.trim();
+    const empPhone = document.getElementById('empPhone').value.trim();
+    const empEmail = document.getElementById('empEmail').value.trim();
+    const empCity = document.getElementById('empCity').value;
+    const empAddress = document.getElementById('empAddress').value.trim();
+    const empDept = document.getElementById('empDepartment').value;
+
+    document.getElementById('previewId').textContent = empId || 'N/A';
+    document.getElementById('previewName').textContent = empName || 'N/A';
+    document.getElementById('previewGender').textContent = empGender || 'N/A';
+    document.getElementById('previewSalary').textContent = empSalary ? `$${parseFloat(empSalary).toFixed(2)}` : 'N/A';
+    document.getElementById('previewPhone').textContent = empPhone || 'N/A';
+    document.getElementById('previewEmail').textContent = empEmail || 'N/A';
+    document.getElementById('previewCity').textContent = empCity || 'N/A';
+    document.getElementById('previewAddress').textContent = empAddress || 'N/A';
+    document.getElementById('previewDept').textContent = empDept || 'N/A';
+    document.getElementById('previewAvatar').textContent = empName ? empName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '';
+  }
+
+  function exportToCSV() {
+    if (employees.length === 0) {
+      showToast('No employees to export! ❌', false);
+      return;
+    }
+
+    const headers = ['ID,Name,Gender,Salary Per Day,Phone,Email,City,Address,Department'];
+    const rows = employees.map(emp =>
+      `${emp.emp_id},${emp.name},${emp.gender},${emp.salary_per_day},${emp.phone},${emp.email},${emp.city || ''},${emp.address},${emp.department}`
+    );
+    const csvContent = [...headers, ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'employees.csv';
+    link.click();
+  }
+
+  function openEditModal(index) {
+    editIndex = index;
+    const emp = employees[index];
+    document.getElementById('editEmpId').value = emp.emp_id;
+    document.getElementById('editEmpName').value = emp.name;
+    document.getElementById('editEmpGender').value = emp.gender;
+    document.getElementById('editEmpSalary').value = emp.salary_per_day;
+    document.getElementById('editEmpPhone').value = emp.phone;
+    document.getElementById('editEmpEmail').value = emp.email;
+    document.getElementById('editEmpCity').value = emp.city || '';
+    document.getElementById('editEmpAddress').value = emp.address;
+    document.getElementById('editEmpDepartment').value = emp.department;
+
+    const modal = document.getElementById('editModal');
+    modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+    modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('editModal');
+    modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+    modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+    editIndex = null;
+  }
+
+  function saveEdit() {
+    if (editIndex === null) return;
+
+    const empId = document.getElementById('editEmpId').value.trim();
+    const empName = document.getElementById('editEmpName').value.trim();
+    const empGender = document.getElementById('editEmpGender').value;
+    const empSalary = parseFloat(document.getElementById('editEmpSalary').value);
+    const empPhone = document.getElementById('editEmpPhone').value.trim();
+    const empEmail = document.getElementById('editEmpEmail').value.trim();
+    const empCity = document.getElementById('editEmpCity').value;
+    const empAddress = document.getElementById('editEmpAddress').value.trim();
+    const empDept = document.getElementById('editEmpDepartment').value;
+
+    if (!empId || !empName || !empGender || !empSalary || !empPhone || !empEmail || !empAddress || !empDept) {
+      showToast('Please fill in all fields! ❌', false);
+      return;
+    }
+
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    if (!phoneRegex.test(empPhone)) {
+      showToast('Phone number must be in format 123-456-7890! ❌', false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(empEmail)) {
+      showToast('Please enter a valid email address! ❌', false);
+      return;
+    }
+
+    employees[editIndex] = {
+      emp_id: empId,
+      name: empName,
+      gender: empGender,
+      salary_per_day: empSalary,
+      phone: empPhone,
+      email: empEmail,
+      city: empCity,
+      address: empAddress,
+      department: empDept,
+    };
+    // Update localStorage
+    localStorage.setItem('employees', JSON.stringify(employees));
+    updateEmployeeList();
+    showToast('Employee updated successfully! 🎉', true);
+    closeModal();
+  }
+
+  function deleteEmployee(index) {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      employees.splice(index, 1);
+      // Update localStorage
+      localStorage.setItem('employees', JSON.stringify(employees));
+      updateEmployeeList();
+      updateEmployeeCount();
+      showToast('Employee deleted successfully! 🎉', true);
+    }
+  }
+
+  // Event Listeners for Real-Time Profile Preview
+  document.getElementById('empId').addEventListener('input', updateProfilePreview);
+  document.getElementById('empName').addEventListener('input', updateProfilePreview);
+  document.getElementById('empGender').addEventListener('change', updateProfilePreview);
+  document.getElementById('empSalary').addEventListener('input', updateProfilePreview);
+  document.getElementById('empPhone').addEventListener('input', updateProfilePreview);
+  document.getElementById('empEmail').addEventListener('input', updateProfilePreview);
+  document.getElementById('empCity').addEventListener('change', updateProfilePreview);
+  document.getElementById('empAddress').addEventListener('input', updateProfilePreview);
+  document.getElementById('empDepartment').addEventListener('change', updateProfilePreview);
+
+  // Event Listener for Search
+  document.getElementById('searchBar').addEventListener('input', updateEmployeeList);
+
+  // Initialize
+  window.onload = () => {
+    // Load employees from localStorage
+    const storedEmployees = localStorage.getItem('employees');
+    if (storedEmployees) {
+      employees = JSON.parse(storedEmployees);
+    }
+    initializeDarkMode();
+    resetForm();
+    updateEmployeeList();
+    updateEmployeeCount();
+  };
+</script>
+</html>

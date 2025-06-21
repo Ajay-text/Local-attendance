@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - CBSL Attendance</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#06B6D4',
+            accent: '#3B82F6',
+            darkBg: '#1F2937',
+            lightBg: '#F9FAFB',
+            muted: '#6B7280',
+          },
+          boxShadow: {
+            'glass': '0 8px 32px rgba(0, 0, 0, 0.1)',
+            'input': 'inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.7)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'scale-up': 'scaleUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            scaleUp: {
+              '0%': { transform: 'scale(0.95)' },
+              '100%': { transform: 'scale(1)' },
+            },
+          },
+        },
+      },
+      darkMode: 'class',
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #E0F7FA 0%, #BFDBFE 100%);
+      min-height: 100vh;
+      transition: background 0.3s ease;
+    }
+    .dark body {
+      background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    .dark .glass-card {
+      background: rgba(31, 41, 55, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .input-field {
+      transition: all 0.3s ease;
+      border-radius: 0.75rem;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+    }
+    .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    .btn {
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .sidebar {
+      transition: transform 0.3s ease;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="flex">
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-primary to-accent text-white p-6 space-y-6 glass-card z-50 md:static md:translate-x-0">
+    <div class="flex items-center space-x-2">
+      <img src="assets/images/logo.png" alt="CBSL Logo" class="h-10 w-auto animate-float" onerror="this.src='https://via.placeholder.com/40';" />
+      <h2 class="text-xl font-bold">CBSL Dashboard</h2>
+    </div>
+    <nav class="space-y-2">
+      <a href="dashboard.html" class="flex items-center space-x-2 p-2 rounded-lg bg-white/20">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="mark-attendance.html" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/20">
+        <i class="fas fa-clock"></i>
+        <span>Mark Attendance</span>
+      </a>
+      <a href="salary.html" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/20">
+        <i class="fas fa-rupee-sign"></i>
+        <span>Salary Report</span>
+      </a>
+      <a href="main.html" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/20">
+        <i class="fas fa-home"></i>
+        <span>Main Menu</span>
+      </a>
+    </nav>
+    <div class="absolute bottom-6">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" id="darkModeToggle" class="accent-accent w-4 h-4 rounded" onchange="toggleDarkMode()">
+        <span class="text-sm font-medium">Dark Mode</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 p-6 md:ml-64">
+    <!-- Mobile Menu Button -->
+    <button id="menuToggle" class="md:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded-full">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Header -->
+    <div class="glass-card p-6 mb-6 rounded-2xl animate-fade-in">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Attendance Dashboard</h1>
+      <p class="text-sm text-muted">Monitor and manage employee attendance</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="glass-card p-6 rounded-2xl animate-fade-in">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-users text-primary text-2xl"></i>
+          <div>
+            <p class="text-sm text-muted">Total Employees</p>
+            <p id="totalEmployees" class="text-xl font-semibold text-gray-800 dark:text-white">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card p-6 rounded-2xl animate-fade-in">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-sign-in-alt text-accent text-2xl"></i>
+          <div>
+            <p class="text-sm text-muted">Today’s Check-Ins</p>
+            <p id="checkIns" class="text-xl font-semibold text-gray-800 dark:text-white">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card p-6 rounded-2xl animate-fade-in">
+        <div class="flex items-center space-x-4">
+          <i class="fas fa-user-times text-red-500 text-2xl"></i>
+          <div>
+            <p class="text-sm text-muted">Absent Today</p>
+            <p id="absent" class="text-xl font-semibold text-gray-800 dark:text-white">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="glass-card p-6 mb-6 rounded-2xl animate-fade-in">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-id-badge mr-2 text-accent"></i> Employee
+          </label>
+          <select id="empId" class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent">
+            <option value="">All Employees</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-alt mr-2 text-accent"></i> Start Date
+          </label>
+          <input id="startDate" type="date" class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-calendar-alt mr-2 text-accent"></i> End Date
+          </label>
+          <input id="endDate" type="date" class="w-full input-field px-4 py-3 bg-white/80 dark:bg-gray-700/80 text-gray-900 dark:text-white focus:ring-accent" />
+        </div>
+      </div>
+      <button onclick="loadDashboard()" class="mt-4 bg-accent text-white font-semibold py-2 px-4 rounded-xl btn">
+        <i class="fas fa-sync-alt mr-2"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Daily Attendance Trend</h3>
+        <canvas id="attendanceTrend"></canvas>
+      </div>
+      <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Attendance Breakdown</h3>
+        <canvas id="attendancePie"></canvas>
+      </div>
+    </div>
+
+    <!-- Attendance Logs -->
+    <div class="glass-card p-6 rounded-2xl">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recent Attendance Logs</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-sm text-muted">
+              <th class="p-2">Employee ID</th>
+              <th class="p-2">Name</th>
+              <th class="p-2">Date</th>
+              <th class="p-2">Time</th>
+              <th class="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logsTable" class="text-gray-800 dark:text-white"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let employeesCache = [];
+    let attendanceTrendChart, attendancePieChart;
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+      updateCharts();
+    }
+
+    function initializeDarkMode() {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkModeToggle').checked = true;
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    async function loadEmployees() {
+      try {
+        const res = await fetch('http://localhost:3000/employees');
+        if (!res.ok) throw new Error(`Failed to fetch employees: ${res.status}`);
+        employeesCache = await res.json();
+        const empIdSelect = document.getElementById('empId');
+        empIdSelect.innerHTML = '<option value="">All Employees</option>';
+        employeesCache.forEach(emp => {
+          if (emp.emp_id) {
+            const option = document.createElement('option');
+            option.value = emp.emp_id;
+            option.textContent = `${emp.emp_id} - ${emp.name}`;
+            empIdSelect.appendChild(option);
+          }
+        });
+      } catch (err) {
+        console.error('Error loading employees:', err);
+        alert(`Failed to load employees: ${err.message}`);
+      }
+    }
+
+    async function loadStats(date = new Date().toISOString().split('T')[0]) {
+      try {
+        const res = await fetch(`http://localhost:3000/dashboard/stats?date=${date}`);
+        if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
+        const stats = await res.json();
+        document.getElementById('totalEmployees').textContent = stats.totalEmployees;
+        document.getElementById('checkIns').textContent = stats.checkIns;
+        document.getElementById('absent').textContent = stats.absent;
+      } catch (err) {
+        console.error('Error loading stats:', err);
+        alert(`Failed to load stats: ${err.message}`);
+      }
+    }
+
+    async function loadAttendance(empId, startDate, endDate) {
+      try {
+        let url = 'http://localhost:3000/attendance';
+        if (empId || (startDate && endDate)) {
+          const params = new URLSearchParams();
+          if (empId) params.append('empId', empId);
+          if (startDate) params.append('start_date', startDate);
+          if (endDate) params.append('end_date', endDate);
+          url += `?${params.toString()}`;
+        }
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch attendance: ${res.status}`);
+        const logs = await res.json();
+        const logsTable = document.getElementById('logsTable');
+        logsTable.innerHTML = logs.map(log => {
+          const time = log.time.match(/^(IN|OUT) - (\d{2}:\d{2}:\d{2})$/) ? log.time : 'Invalid Time';
+          return `
+            <tr>
+              <td class="p-2">${log.emp_id}</td>
+              <td class="p-2">${log.name}</td>
+              <td class="p-2">${log.date || 'Invalid Date'}</td>
+              <td class="p-2">${time}</td>
+              <td class="p-2">
+                <button onclick="deleteLog(${log.id})" class="text-red-500 hover:text-red-700">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        return logs;
+      } catch (err) {
+        console.error('Error loading attendance:', err);
+        alert(`Failed to load attendance: ${err.message}`);
+        return [];
+      }
+    }
+
+    async function loadCharts(empId, startDate, endDate) {
+      const logs = await loadAttendance(empId, startDate, endDate);
+
+      // Daily Attendance Trend
+      const dates = [...new Set(logs.map(log => log.date))].sort();
+      const checkInCounts = dates.map(date => {
+        return logs.filter(log => log.date === date && log.time.includes('IN')).length;
+      });
+      const ctxTrend = document.getElementById('attendanceTrend').getContext('2d');
+      if (attendanceTrendChart) attendanceTrendChart.destroy();
+      attendanceTrendChart = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: 'Check-Ins',
+            data: checkInCounts,
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true, title: { display: true, text: 'Check-Ins' } } }
+        }
+      });
+
+      // Attendance Breakdown
+      const uniqueEmployees = [...new Set(logs.map(log => log.emp_id))];
+      const employeeCounts = uniqueEmployees.map(empId => {
+        return logs.filter(log => log.emp_id === empId && log.time.includes('IN')).length;
+      });
+      const ctxPie = document.getElementById('attendancePie').getContext('2d');
+      if (attendancePieChart) attendancePieChart.destroy();
+      attendancePieChart = new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+          labels: uniqueEmployees.map(id => {
+            const emp = employeesCache.find(e => e.emp_id === id);
+            return emp ? emp.name : id;
+          }),
+          datasets: [{
+            data: employeeCounts,
+            backgroundColor: ['#3B82F6', '#06B6D4', '#EF4444', '#10B981'],
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    function updateCharts() {
+      if (attendanceTrendChart) {
+        attendanceTrendChart.data.datasets[0].borderColor = document.documentElement.classList.contains('dark') ? '#60A5FA' : '#3B82F6';
+        attendanceTrendChart.data.datasets[0].backgroundColor = document.documentElement.classList.contains('dark') ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.2)';
+        attendanceTrendChart.update();
+      }
+      if (attendancePieChart) attendancePieChart.update();
+    }
+
+    async function deleteLog(id) {
+      if (!confirm('Are you sure you want to delete this attendance record?')) return;
+      try {
+        const res = await fetch(`http://localhost:3000/attendance/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`Failed to delete log: ${res.status}`);
+        alert('Attendance record deleted');
+        loadDashboard();
+      } catch (err) {
+        console.error('Error deleting log:', err);
+        alert(`Failed to delete log: ${err.message}`);
+      }
+    }
+
+    async function loadDashboard() {
+      const empId = document.getElementById('empId').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+        alert('End date must be after start date');
+        document.getElementById('endDate').value = '';
+        return;
+      }
+
+      await loadStats(startDate || new Date().toISOString().split('T')[0]);
+      await loadCharts(empId, startDate, endDate);
+    }
+
+    window.onload = () => {
+      initializeDarkMode();
+      loadEmployees();
+      const now = new Date();
+      document.getElementById('startDate').value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
+      document.getElementById('endDate').value = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()}`;
+      loadDashboard();
+
+      document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+      ['empId', 'startDate', 'endDate'].forEach(id => {
+        document.getElementById(id).addEventListener('change', loadDashboard);
+      });
+    };
+  </script>
+</body>
+</html>

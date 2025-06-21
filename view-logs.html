@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-all duration-300">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Logs - CBSL</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2D3748',
+            secondary: '#7C3AED',
+            accent: '#38B2AC',
+            danger: '#F56565',
+            muted: '#A0AEC0',
+            card: '#F7FAFC',
+            glass: 'rgba(255, 255, 255, 0.1)',
+            glassBorder: 'rgba(255, 255, 255, 0.2)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+            'pulse': 'pulse 0.2s ease-in-out',
+            'bounce': 'bounce 0.3s ease-in-out',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+            pulse: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' } },
+            bounce: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
+          },
+          boxShadow: { 'card': '0 4px 20px rgba(0, 0, 0, 0.05)', 'card-hover': '0 6px 24px rgba(0, 0, 0, 0.1)' },
+          scrollbarWidth: { 'thin': 'thin' },
+        },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #7C3AED, #38B2AC);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .input-focus {
+      transition: all 0.3s ease;
+    }
+    .input-focus:focus {
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.3);
+      border-color: #38B2AC;
+    }
+    tr { transition: background-color 0.2s ease, transform 0.2s ease; }
+    tr:hover { transform: scale(1.01); }
+    .toast { transition: all 0.3s ease; }
+    .custom-scroll::-webkit-scrollbar { width: 8px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #EDF2F7; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #7C3AED; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #6B46C1; }
+    .dark .custom-scroll::-webkit-scrollbar-track { background: #2D3748; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #38B2AC; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb:hover { background: #2C7A7B; }
+  </style>
+</head>
+<body class="flex bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 min-h-screen transition-all duration-300">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-primary to-secondary text-white glassmorphism transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 shadow-lg">
+    <div class="p-6 flex items-center gap-3">
+      <i class="fas fa-briefcase text-2xl"></i>
+      <h2 class="text-xl font-semibold">CBSL</h2>
+    </div>
+    <nav class="mt-4 space-y-2">
+      <a href="dashboard.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="mark-attendance.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-fingerprint"></i> Mark Attendance</a>
+      <a href="view-logs.html" class="flex items-center gap-3 px-6 py-3 bg-glass rounded-lg text-white font-semibold"><i class="fas fa-calendar-check"></i> View Logs</a>
+      <a href="add-employee.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-user-plus"></i> Add Employee</a>
+      <a href="salary.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-money-bill-wave"></i> Salary</a>
+      <a href="register.html" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-user-plus"></i> Register</a>
+      <a href="login.html" id="logoutButton" class="flex items-center gap-3 px-6 py-3 hover:bg-glass rounded-lg transition-colors"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 lg:ml-64 p-6">
+    <button id="menuToggle" class="lg:hidden p-3 bg-primary text-white rounded-full hover:bg-secondary transition-colors"><i class="fas fa-bars"></i></button>
+    <div class="max-w-6xl mx-auto mt-6">
+      <div class="glassmorphism rounded-3xl shadow-card p-8 animate-slide-up">
+        <h2 class="text-3xl font-bold text-center gradient-text mb-8 flex items-center justify-center gap-3">
+          <i class="fas fa-list"></i> Employee Attendance Logs
+        </h2>
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+            <i class="fas fa-filter text-secondary"></i> Filter Logs
+          </h3>
+          <div class="relative w-64">
+            <label for="filterEmpId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Filter by Employee ID</label>
+            <select id="filterEmpId" onchange="loadAttendanceLogs()" class="w-full p-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white input-focus appearance-none" aria-label="Filter by Employee ID">
+              <option value="">All Employees</option>
+              <option value="V2103168007">V2103168007</option>
+              <option value="V2103168131">V2103168131</option>
+            </select>
+            <i class="fas fa-id-badge absolute left-3 top-10 text-muted"></i>
+          </div>
+        </div>
+        <div class="max-h-[400px] overflow-y-auto rounded-2xl border border-gray-200 dark:border-gray-600 bg-card dark:bg-gray-800 shadow-card custom-scroll">
+          <table class="min-w-full table-auto border-collapse" aria-label="Attendance Logs">
+            <thead class="bg-secondary text-white sticky top-0 z-10">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">#</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Employee ID</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Name</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Date</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Mark In</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Mark Out</th>
+                <th scope="col" class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-tight">Total Hours ⏰</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody" class="divide-y divide-gray-200 dark:divide-gray-600 text-gray-600 dark:text-gray-300">
+              <!-- Dynamic rows will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+        <div class="flex justify-center mt-8">
+          <button id="downloadLogs" class="bg-accent hover:bg-teal-600 text-white px-8 py-3 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
+            <i class="fas fa-download"></i> Download Logs
+          </button>
+        </div>
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-6 right-6 bg-accent text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast" role="alert">
+          Action completed!
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Employee ID to name mapping
+    const empNames = {
+      "V2103168007": "Ajay",
+      "V2103168131": "Ali"
+    };
+
+    // Convert 24-hour HH:MM:SS to 12-hour h:MM AM/PM
+    function formatTimeTo12Hour(time) {
+      if (time === 'N/A') return 'N/A';
+      try {
+        const [hours, minutes] = time.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12; // Convert 0 to 12 for midnight
+        return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+      } catch (err) {
+        console.error('Error formatting time:', time, err);
+        return 'Invalid';
+      }
+    }
+
+    // Calculate hours between markIn and markOut in Xh Ym format
+    function calculateHours(markIn, markOut) {
+      if (markIn === 'N/A' || markOut === 'N/A') return 'N/A';
+      try {
+        // Parse times (e.g., "09:00:00" to Date objects)
+        const [inHours, inMinutes, inSeconds] = markIn.split(':').map(Number);
+        const [outHours, outMinutes, outSeconds] = markOut.split(':').map(Number);
+
+        const date = new Date();
+        const inTime = new Date(date.setHours(inHours, inMinutes, inSeconds, 0));
+        const outTime = new Date(date.setHours(outHours, outMinutes, outSeconds, 0));
+
+        // Calculate difference in milliseconds
+        const diffMs = outTime - inTime;
+        if (diffMs < 0) return 'Invalid'; // Handle cases where markOut is before markIn
+
+        // Convert to hours and minutes
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return `${hours}h ${minutes}m`;
+      } catch (err) {
+        console.error('Error calculating hours:', markIn, markOut, err);
+        return 'Invalid';
+      }
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `fixed bottom-6 right-6 ${isError ? 'bg-danger' : 'bg-accent'} text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-4 pointer-events-none toast`;
+      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }, 3000);
+    }
+
+    function loadAttendanceLogs() {
+      const filterEmpId = document.getElementById('filterEmpId').value;
+      const url = filterEmpId ? `http://localhost:3000/attendance?empId=${encodeURIComponent(filterEmpId)}` : 'http://localhost:3000/attendance';
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Failed to load logs (Status: ${res.status})`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('logTableBody');
+          tbody.innerHTML = '';
+
+          // Group attendance by emp_id and date
+          const groupedData = {};
+          data.forEach(entry => {
+            const key = `${entry.emp_id}_${entry.date}`;
+            if (!groupedData[key]) {
+              groupedData[key] = {
+                emp_id: entry.emp_id,
+                name: entry.name,
+                date: entry.date,
+                markIn: 'N/A',
+                markOut: 'N/A'
+              };
+            }
+            if (entry.time.includes('IN')) {
+              groupedData[key].markIn = entry.time.replace('IN - ', '');
+            } else if (entry.time.includes('OUT')) {
+              groupedData[key].markOut = entry.time.replace('OUT - ', '');
+            }
+          });
+
+          // Convert grouped data to array and sort by date
+          const rows = Object.values(groupedData).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          // Populate table
+          rows.forEach((entry, index) => {
+            const formattedDate = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+            const markIn12 = formatTimeTo12Hour(entry.markIn);
+            const markOut12 = formatTimeTo12Hour(entry.markOut);
+            const totalHours = calculateHours(entry.markIn, entry.markOut);
+            const row = document.createElement('tr');
+            row.className = 'even:bg-card dark:even:bg-gray-700 hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-all';
+            row.innerHTML = `
+              <td class="px-6 py-4 text-sm">${index + 1}</td>
+              <td class="px-6 py-4 text-sm">${entry.emp_id}</td>
+              <td class="px-6 py-4 text-sm">${entry.name}</td>
+              <td class="px-6 py-4 text-sm">${formattedDate}</td>
+              <td class="px-6 py-4 text-sm">${markIn12}</td>
+              <td class="px-6 py-4 text-sm">${markOut12}</td>
+              <td class="px-6 py-4 text-sm">${totalHours}</td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          if (rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-muted dark:text-gray-400">No attendance records found${filterEmpId ? ' for this employee' : ''}.</td></tr>`;
+          }
+          showToast(`Attendance logs loaded${filterEmpId ? ` for ${empNames[filterEmpId] || filterEmpId}` : ''}!`);
+        })
+        .catch(err => {
+          console.error('Error loading logs:', err.message);
+          const tbody = document.getElementById('logTableBody');
+          tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-danger">Failed to load logs: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}</td></tr>`;
+          showToast(`Failed to load logs: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    }
+
+    document.getElementById('downloadLogs').addEventListener('click', () => {
+      const filterEmpId = document.getElementById('filterEmpId').value;
+      const url = filterEmpId ? `http://localhost:3000/attendance?empId=${encodeURIComponent(filterEmpId)}` : 'http://localhost:3000/attendance';
+
+      fetch(url)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch logs (Status: ${res.status})`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          const groupedData = {};
+          data.forEach(entry => {
+            const key = `${entry.emp_id}_${entry.date}`;
+            if (!groupedData[key]) {
+              groupedData[key] = {
+                emp_id: entry.emp_id,
+                name: entry.name,
+                date: entry.date,
+                markIn: 'N/A',
+                markOut: 'N/A'
+              };
+            }
+            if (entry.time.includes('IN')) {
+              groupedData[key].markIn = entry.time.replace('IN - ', '');
+            } else if (entry.time.includes('OUT')) {
+              groupedData[key].markOut = entry.time.replace('OUT - ', '');
+            }
+          });
+
+          const rows = Object.values(groupedData).sort((a, b) => new Date(b.date) - new Date(a.date));
+          const headers = ['#', 'Employee ID', 'Name', 'Date', 'Mark In', 'Mark Out', 'Total Hours'];
+          const csvRows = rows.map((entry, index) => [
+            index + 1,
+            entry.emp_id,
+            `"${entry.name.replace(/"/g, '""')}"`,
+            new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+            formatTimeTo12Hour(entry.markIn),
+            formatTimeTo12Hour(entry.markOut),
+            calculateHours(entry.markIn, entry.markOut)
+          ]);
+
+          const csvContent = [
+            headers.join(','),
+            ...csvRows.map(row => row.join(','))
+          ].join('\n');
+
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `attendance_logs${filterEmpId ? `_${filterEmpId}` : ''}_${new Date().toISOString().split('T')[0]}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          showToast('Logs downloaded successfully!');
+        })
+        .catch(err => {
+          console.error('Error downloading logs:', err.message);
+          showToast(`Error downloading logs: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', (e) => {
+      e.preventDefault();
+      fetch('http://localhost:3000/logout')
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Failed to logout (Status: ${res.status})`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          showToast('Logged out successfully!');
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1000);
+        })
+        .catch(err => {
+          console.error('Logout error:', err.message);
+          showToast(`Error logging out: ${err.message.includes('Failed to fetch') ? 'Server not responding.' : err.message}`, true);
+        });
+    });
+
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    });
+
+    window.onload = () => {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+      }
+      loadAttendanceLogs();
+    };
+  </script>
+</body>
+</html>
